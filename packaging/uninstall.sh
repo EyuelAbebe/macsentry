@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-# Uninstall the sentinel launchd user agent on macOS.
+# Uninstall the macsentry launchd user agent on macOS.
 # Run with: bash packaging/uninstall.sh
 set -euo pipefail
 
-LABEL="com.sentinel.agent"
+LABEL="com.macsentry.agent"
 PLIST_DST="${HOME}/Library/LaunchAgents/${LABEL}.plist"
 
 # ── prefer the Python-native CLI when available ───────────────────────────────
-if command -v sentinel &>/dev/null; then
-    echo "Delegating to: sentinel service uninstall"
-    sentinel service uninstall
-    exit $?
-fi
+for name in macsentry sentinel; do
+    if command -v "${name}" &>/dev/null; then
+        echo "Delegating to: ${name} service uninstall"
+        "${name}" service uninstall
+        exit $?
+    fi
+done
 
 if [[ ! -f "${PLIST_DST}" ]]; then
     echo "Plist not found at ${PLIST_DST} — nothing to uninstall."
@@ -26,4 +28,4 @@ fi
 
 rm -f "${PLIST_DST}"
 echo "Removed: ${PLIST_DST}"
-echo "Sentinel launchd agent uninstalled."
+echo "MacSentry launchd agent uninstalled."
