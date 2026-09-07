@@ -4,11 +4,11 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.sentinel.agent</string>
+    <string>com.macsentry.agent</string>
 
     <key>ProgramArguments</key>
     <array>
-        <!-- Replaced by install.sh with the absolute path to the sentinel binary -->
+        <!-- Replaced by install.sh with the absolute path to the macsentry binary -->
         <string>SENTINEL_BIN</string>
         <string>serve</string>
         <string>--host</string>
@@ -27,11 +27,11 @@
     <key>ThrottleInterval</key>
     <integer>10</integer>
 
-    <!-- Log stdout/stderr to ~/Library/Logs/sentinel/ -->
+    <!-- Log stdout/stderr to ~/Library/Logs/macsentry/ -->
     <key>StandardOutPath</key>
-    <string>SENTINEL_LOG_DIR/sentinel.log</string>
+    <string>SENTINEL_LOG_DIR/macsentry.log</string>
     <key>StandardErrorPath</key>
-    <string>SENTINEL_LOG_DIR/sentinel.err.log</string>
+    <string>SENTINEL_LOG_DIR/macsentry.err.log</string>
 
     <!-- Run as the installing user (not root) -->
     <key>UserName</key>
@@ -40,7 +40,7 @@
     <!-- Sandbox: only network bind on loopback is needed -->
     <key>EnvironmentVariables</key>
     <dict>
-        <key>SENTINEL_LOG_LEVEL</key>
+        <key>MACSENTRY_LOG_LEVEL</key>
         <string>WARNING</string>
     </dict>
 </dict>

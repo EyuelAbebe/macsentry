@@ -15,9 +15,9 @@ service_app = typer.Typer(help="Manage the Sentinel background service (macOS la
 console = Console()
 err_console = Console(stderr=True)
 
-LABEL = "com.sentinel.agent"
-PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / "com.sentinel.agent.plist"
-LOG_DIR = Path.home() / "Library" / "Logs" / "sentinel"
+LABEL = "com.macsentry.agent"
+PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / "com.macsentry.agent.plist"
+LOG_DIR = Path.home() / "Library" / "Logs" / "macsentry"
 API_URL = "http://127.0.0.1:7173"
 
 _PLIST_TEMPLATE = """\
@@ -27,7 +27,7 @@ _PLIST_TEMPLATE = """\
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.sentinel.agent</string>
+    <string>com.macsentry.agent</string>
 
     <key>ProgramArguments</key>
     <array>
@@ -48,16 +48,16 @@ _PLIST_TEMPLATE = """\
     <integer>10</integer>
 
     <key>StandardOutPath</key>
-    <string>SENTINEL_LOG_DIR/sentinel.log</string>
+    <string>SENTINEL_LOG_DIR/macsentry.log</string>
     <key>StandardErrorPath</key>
-    <string>SENTINEL_LOG_DIR/sentinel.err.log</string>
+    <string>SENTINEL_LOG_DIR/macsentry.err.log</string>
 
     <key>UserName</key>
     <string>SENTINEL_USER</string>
 
     <key>EnvironmentVariables</key>
     <dict>
-        <key>SENTINEL_LOG_LEVEL</key>
+        <key>MACSENTRY_LOG_LEVEL</key>
         <string>WARNING</string>
     </dict>
 </dict>
@@ -65,13 +65,15 @@ _PLIST_TEMPLATE = """\
 """
 
 
-def _find_sentinel_bin() -> str | None:
-    found = shutil.which("sentinel")
-    if found:
-        return found
-    candidate = Path(sys.executable).parent / "sentinel"
-    if candidate.is_file() and candidate.stat().st_mode & 0o111:
-        return str(candidate)
+def _find_cli_bin() -> str | None:
+    # Prefer the macsentry entry point; fall back to sentinel for compatibility.
+    for name in ("macsentry", "sentinel"):
+        found = shutil.which(name)
+        if found:
+            return found
+        candidate = Path(sys.executable).parent / name
+        if candidate.is_file() and candidate.stat().st_mode & 0o111:
+            return str(candidate)
     return None
 
 
@@ -99,11 +101,12 @@ def _is_loaded() -> bool:
 @service_app.command("install")
 def install() -> None:
     """Write the launchd plist and start the service at login."""
-    sentinel_bin = _find_sentinel_bin()
-    if not sentinel_bin:
+    cli_bin = _find_cli_bin()
+    if not cli_bin:
         err_console.print(
-            "[red]Cannot find the sentinel binary.[/red]\n"
-            "Make sure sentinel is installed and on your PATH, then retry."
+            "[red]Cannot find the macsentry binary.[/red]\n"
+            "Make sure macsentry is installed and on your PATH, then retry.\n"
+            "  pip install macsentry[api]"
         )
         raise typer.Exit(1)
 
@@ -111,7 +114,7 @@ def install() -> None:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     plist = (
-        _PLIST_TEMPLATE.replace("SENTINEL_BIN", sentinel_bin)
+        _PLIST_TEMPLATE.replace("SENTINEL_BIN", cli_bin)
         .replace("SENTINEL_LOG_DIR", str(LOG_DIR))
         .replace("SENTINEL_USER", getpass.getuser())
     )
@@ -126,10 +129,10 @@ def install() -> None:
         err_console.print(f"[red]launchctl load failed:[/red] {result.stderr.strip()}")
         raise typer.Exit(1)
 
-    console.print("[green]Sentinel service installed and started.[/green]")
-    console.print(f"  Logs  [dim]{LOG_DIR}/sentinel.log[/dim]")
+    console.print("[green]MacSentry service installed and started.[/green]")
+    console.print(f"  Logs  [dim]{LOG_DIR}/macsentry.log[/dim]")
     console.print(f"  API   [dim]{API_URL}/health[/dim]")
-    console.print("  Check status with:  [bold]sentinel service status[/bold]")
+    console.print("  Check status with:  [bold]macsentry service status[/bold]")
 
 
 @service_app.command("uninstall")
@@ -145,7 +148,7 @@ def uninstall() -> None:
     else:
         console.print("[dim]Plist not found — nothing to remove.[/dim]")
 
-    console.print("[green]Sentinel service uninstalled.[/green]")
+    console.print("[green]MacSentry service uninstalled.[/green]")
 
 
 @service_app.command("start")
@@ -154,7 +157,7 @@ def start() -> None:
     if not PLIST_PATH.exists():
         err_console.print(
             "[red]Service is not installed.[/red]\n"
-            "Run  [bold]sentinel service install[/bold]  first."
+            "Run  [bold]macsentry service install[/bold]  first."
         )
         raise typer.Exit(1)
 
@@ -167,7 +170,7 @@ def start() -> None:
         err_console.print(f"[red]Failed to start:[/red] {result.stderr.strip()}")
         raise typer.Exit(1)
 
-    console.print("[green]Sentinel service started.[/green]")
+    console.print("[green]MacSentry service started.[/green]")
 
 
 @service_app.command("stop")
@@ -182,7 +185,7 @@ def stop() -> None:
         err_console.print(f"[red]Failed to stop:[/red] {result.stderr.strip()}")
         raise typer.Exit(1)
 
-    console.print("[green]Sentinel service stopped.[/green]")
+    console.print("[green]MacSentry service stopped.[/green]")
 
 
 @service_app.command("restart")
@@ -191,7 +194,7 @@ def restart() -> None:
     if not PLIST_PATH.exists():
         err_console.print(
             "[red]Service is not installed.[/red]\n"
-            "Run  [bold]sentinel service install[/bold]  first."
+            "Run  [bold]macsentry service install[/bold]  first."
         )
         raise typer.Exit(1)
 
@@ -204,7 +207,7 @@ def restart() -> None:
         err_console.print(f"[red]Failed to start:[/red] {result.stderr.strip()}")
         raise typer.Exit(1)
 
-    console.print("[green]Sentinel service restarted.[/green]")
+    console.print("[green]MacSentry service restarted.[/green]")
 
 
 @service_app.command("status")
@@ -243,7 +246,7 @@ def status() -> None:
     except Exception:
         console.print(f"  API      [dim]not reachable at {API_URL}/health[/dim]")
 
-    console.print(f"  Logs     [dim]{LOG_DIR}/sentinel.log[/dim]")
+    console.print(f"  Logs     [dim]{LOG_DIR}/macsentry.log[/dim]")
 
     if not installed:
-        console.print("\n  Run  [bold]sentinel service install[/bold]  to set up the service.")
+        console.print("\n  Run  [bold]macsentry service install[/bold]  to set up the service.")

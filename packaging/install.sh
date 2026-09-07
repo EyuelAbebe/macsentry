@@ -1,42 +1,46 @@
 #!/usr/bin/env bash
-# Install sentinel as a launchd user agent on macOS.
+# Install macsentry as a launchd user agent on macOS.
 # Run with: bash packaging/install.sh
 set -euo pipefail
 
-LABEL="com.sentinel.agent"
+LABEL="com.macsentry.agent"
 PLIST_SRC="$(cd "$(dirname "$0")" && pwd)/${LABEL}.plist"
 AGENTS_DIR="${HOME}/Library/LaunchAgents"
 PLIST_DST="${AGENTS_DIR}/${LABEL}.plist"
-LOG_DIR="${HOME}/Library/Logs/sentinel"
+LOG_DIR="${HOME}/Library/Logs/macsentry"
 
-# ── resolve sentinel binary ───────────────────────────────────────────────────
-SENTINEL_BIN="$(command -v sentinel 2>/dev/null || true)"
-if [[ -z "${SENTINEL_BIN}" ]]; then
+# ── resolve macsentry/sentinel binary ────────────────────────────────────────
+SENTINEL_BIN=""
+for name in macsentry sentinel; do
+    SENTINEL_BIN="$(command -v "${name}" 2>/dev/null || true)"
+    if [[ -n "${SENTINEL_BIN}" ]]; then break; fi
     # Try common Poetry/pip install locations
     for candidate in \
-        "${HOME}/.local/bin/sentinel" \
-        "${HOME}/.venv/bin/sentinel" \
-        "$(python3 -m site --user-base 2>/dev/null)/bin/sentinel"
+        "${HOME}/.local/bin/${name}" \
+        "${HOME}/.venv/bin/${name}" \
+        "$(python3 -m site --user-base 2>/dev/null)/bin/${name}"
     do
         if [[ -x "${candidate}" ]]; then
             SENTINEL_BIN="${candidate}"
-            break
+            break 2
         fi
     done
-fi
+done
 
 if [[ -z "${SENTINEL_BIN}" ]]; then
-    echo "ERROR: sentinel binary not found. Install it first:" >&2
-    echo "  pip install sentinel[api]" >&2
+    echo "ERROR: macsentry binary not found. Install it first:" >&2
+    echo "  pip install macsentry[api]" >&2
     exit 1
 fi
 
 # ── prefer the Python-native CLI when available ───────────────────────────────
-if command -v sentinel &>/dev/null; then
-    echo "Delegating to: sentinel service install"
-    sentinel service install
-    exit $?
-fi
+for name in macsentry sentinel; do
+    if command -v "${name}" &>/dev/null; then
+        echo "Delegating to: ${name} service install"
+        "${name}" service install
+        exit $?
+    fi
+done
 
 # ── prepare directories ───────────────────────────────────────────────────────
 mkdir -p "${AGENTS_DIR}" "${LOG_DIR}"
@@ -60,10 +64,10 @@ fi
 launchctl load "${PLIST_DST}"
 
 echo ""
-echo "Sentinel agent loaded. Status:"
+echo "MacSentry agent loaded. Status:"
 launchctl list "${LABEL}" 2>/dev/null || echo "  (launchctl list returned no output — service may still be starting)"
 echo ""
-echo "Logs: ${LOG_DIR}/sentinel.log"
+echo "Logs: ${LOG_DIR}/macsentry.log"
 echo "API:  http://127.0.0.1:7173/health"
 echo ""
 echo "To uninstall: bash packaging/uninstall.sh"
