@@ -18,7 +18,7 @@ A local security and privacy monitoring tool for macOS. It watches running proce
 open ports, and network connections and surfaces anything unusual — without a cloud
 backend, root access, or external dependencies for core operation.
 
-CLI name: `sentinel` | Language: Python 3.12+ | Packaging: Poetry
+Package name: `macsentry` | CLI name: `sentinel` | Language: Python 3.12+ | Packaging: Poetry
 
 ---
 

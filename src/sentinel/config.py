@@ -8,13 +8,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class SentinelConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="SENTINEL_",
+        env_prefix="MACSENTRY_",
         env_file=".env",
         env_file_encoding="utf-8",
     )
 
     log_level: str = "WARNING"
-    data_dir: Path = Path.home() / ".local" / "share" / "sentinel"
+    data_dir: Path = Path.home() / ".local" / "share" / "macsentry"
     poll_interval_seconds: float = 2.0
     scan_timeout_seconds: float = 30.0
 
@@ -25,7 +25,7 @@ class SentinelConfig(BaseSettings):
 
     @property
     def db_path(self) -> Path:
-        return self.data_dir / "sentinel.db"
+        return self.data_dir / "macsentry.db"
 
     def ensure_data_dir(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)

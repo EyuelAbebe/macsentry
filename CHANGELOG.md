@@ -273,7 +273,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - macOS SIP prevents `psutil.net_connections()` without elevated privileges; partial data for system processes
 - Very short-lived processes (< poll interval) may not be detected
 
-[Unreleased]: https://github.com/EyuelAbebe/sentinel/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/EyuelAbebe/sentinel/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/EyuelAbebe/sentinel/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/EyuelAbebe/sentinel/releases/tag/v0.1.0
+[Unreleased]: https://github.com/EyuelAbebe/macsentry/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/EyuelAbebe/macsentry/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/EyuelAbebe/macsentry/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/EyuelAbebe/macsentry/releases/tag/v0.1.0

@@ -3,11 +3,11 @@
 # Run with: bash packaging/install.sh
 set -euo pipefail
 
-LABEL="com.sentinel.agent"
-PLIST_SRC="$(cd "$(dirname "$0")" && pwd)/${LABEL}.plist"
+LABEL="com.macsentry.agent"
+PLIST_SRC="$(cd "$(dirname "$0")" && pwd)/com.macsentry.agent.plist"
 AGENTS_DIR="${HOME}/Library/LaunchAgents"
 PLIST_DST="${AGENTS_DIR}/${LABEL}.plist"
-LOG_DIR="${HOME}/Library/Logs/sentinel"
+LOG_DIR="${HOME}/Library/Logs/macsentry"
 
 # ── resolve sentinel binary ───────────────────────────────────────────────────
 SENTINEL_BIN="$(command -v sentinel 2>/dev/null || true)"
@@ -27,7 +27,7 @@ fi
 
 if [[ -z "${SENTINEL_BIN}" ]]; then
     echo "ERROR: sentinel binary not found. Install it first:" >&2
-    echo "  pip install sentinel[api]" >&2
+    echo "  pip install macsentry[api]" >&2
     exit 1
 fi
 

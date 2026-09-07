@@ -31,7 +31,7 @@ flowchart LR
 
     subgraph STORE["Storage"]
         MEM["In-memory only\nPhase 0–3"]
-        SQL["SQLite on disk\n~/.local/share/sentinel/\nPhase 4+"]
+        SQL["SQLite on disk\n~/.local/share/macsentry/\nPhase 4+"]
         CLOUD["Cloud / External"]
     end
 
@@ -87,9 +87,9 @@ flowchart LR
 | Phase | Storage | Location |
 |---|---|---|
 | 0–3 (current) | In-memory only | Cleared when the process exits |
-| 4+ | SQLite database | `~/.local/share/sentinel/sentinel.db` |
+| 4+ | SQLite database | `~/.local/share/macsentry/macsentry.db` |
 
-The data directory path is configurable via `SENTINEL_DATA_DIR`.
+The data directory path is configurable via `MACSENTRY_DATA_DIR`.
 
 Sentinel does **not** write to system locations, shared directories, or locations accessible by other users.
 
@@ -101,7 +101,7 @@ Sentinel does **not** write to system locations, shared directories, or location
 - **Phase 4+:** Events are persisted to SQLite. A configurable retention policy will control how long historical events are kept. The default will be 30 days.
 - **Users can delete all stored data** at any time:
   ```bash
-  rm -rf ~/.local/share/sentinel/
+  rm -rf ~/.local/share/macsentry/
   ```
 
 ---
@@ -163,7 +163,7 @@ Log level is `WARNING` by default. Debug logging (`SENTINEL_LOG_LEVEL=DEBUG`) is
 | Cloud backend | None |
 | Data sent off-device | Nothing (Phase 0–8) |
 | Persistent storage introduced | Phase 4 |
-| Default storage location | `~/.local/share/sentinel/` |
+| Default storage location | `~/.local/share/macsentry/` |
 | Cookie values stored | Never |
 | Full URLs stored | Never |
-| User action to delete all data | `rm -rf ~/.local/share/sentinel/` |
+| User action to delete all data | `rm -rf ~/.local/share/macsentry/` |

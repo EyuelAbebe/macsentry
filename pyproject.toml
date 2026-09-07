@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "sentinel"
+name = "macsentry"
 version = "0.8.0"
 description = "Local security and privacy monitoring for macOS — processes, ports, and network connections in one view"
 authors = ["Eyuel Abebe <eyueld@gmail.com>"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/EyuelAbebe/sentinel"
-repository = "https://github.com/EyuelAbebe/sentinel"
-documentation = "https://github.com/EyuelAbebe/sentinel#readme"
+homepage = "https://github.com/EyuelAbebe/macsentry"
+repository = "https://github.com/EyuelAbebe/macsentry"
+documentation = "https://github.com/EyuelAbebe/macsentry#readme"
 keywords = ["security", "privacy", "monitoring", "processes", "network", "macos"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -34,9 +34,9 @@ pydantic = ">=2"
 pydantic-settings = ">=2"
 sqlalchemy = ">=2.0"
 alembic = ">=1.13"
-# TUI is optional — install with: pip install sentinel[tui]
+# TUI is optional — install with: pip install macsentry[tui]
 textual = {version = ">=0.80", optional = true}
-# HTTP API is optional — install with: pip install sentinel[api]
+# HTTP API is optional — install with: pip install macsentry[api]
 fastapi = {version = ">=0.111", optional = true}
 uvicorn = {extras = ["standard"], version = "^0.52.4", optional = true}
 
@@ -76,7 +76,7 @@ ignore = ["E501"]
 python_version = "3.12"
 strict = true
 mypy_path = "src"
-packages = ["sentinel"]
+packages = ["sentinel"]  # Python import name stays sentinel; distribution name is macsentry
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

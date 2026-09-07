@@ -3,7 +3,7 @@
 # Run with: bash packaging/uninstall.sh
 set -euo pipefail
 
-LABEL="com.sentinel.agent"
+LABEL="com.macsentry.agent"
 PLIST_DST="${HOME}/Library/LaunchAgents/${LABEL}.plist"
 
 # ── prefer the Python-native CLI when available ───────────────────────────────

@@ -42,7 +42,7 @@ flowchart TD
         SZ["Suricata / Zeek *(Phase 10)*"]
     end
 
-    DB[("SQLite\n~/.local/share/sentinel/\n*(Phase 4+)*")]
+    DB[("SQLite\n~/.local/share/macsentry/\n*(Phase 4+)*")]
 
     IF -->|"in-process calls\n(Phase 0–8)"| APP
     GUI -. "HTTP / WebSocket\n*(Phase 9+)*" .-> APP
@@ -242,8 +242,8 @@ An interactive terminal application built with [Textual](https://textual.textual
 
 Introduced in **Phase 4**. SQLite in WAL mode via SQLAlchemy and Alembic. Separate logical repositories for current state, event history, findings, baselines, classification cache, and settings.
 
-Default path: `~/.local/share/sentinel/sentinel.db`  
-Override with: `SENTINEL_DATA_DIR=/your/path`
+Default path: `~/.local/share/macsentry/macsentry.db`  
+Override with: `MACSENTRY_DATA_DIR=/your/path`
 
 ---
 
