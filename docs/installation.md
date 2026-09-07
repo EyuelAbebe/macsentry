@@ -9,8 +9,8 @@
 Sentinel is not yet published to PyPI. Clone the repo and install with [Poetry](https://python-poetry.org).
 
 ```bash
-git clone https://github.com/EyuelAbebe/sentinel.git
-cd sentinel
+git clone https://github.com/EyuelAbebe/macsentry.git
+cd macsentry
 pip install poetry          # if you don't have Poetry yet
 poetry install              # installs all runtime + dev dependencies
 ```
@@ -42,18 +42,18 @@ brew install pipx
 pipx ensurepath
 
 # CLI + interactive TUI (recommended)
-pipx install "sentinel[tui]"
+pipx install "macsentry[tui]"
 
 # CLI only (no interactive monitor)
-pipx install sentinel
+pipx install macsentry
 ```
 
 Or with pip into a virtual environment:
 
 ```bash
-python3 -m venv ~/.venvs/sentinel
-source ~/.venvs/sentinel/bin/activate
-pip install "sentinel[tui]"
+python3 -m venv ~/.venvs/macsentry
+source ~/.venvs/macsentry/bin/activate
+pip install "macsentry[tui]"
 ```
 
 ---
@@ -77,7 +77,7 @@ Sentinel ships a launchd agent that starts the local API server (`sentinel serve
 Requires the `api` extra:
 
 ```bash
-poetry install --extras api   # or: pip install "sentinel[api]"
+poetry install --extras api   # or: pip install "macsentry[api]"
 sentinel service install
 ```
 
@@ -106,7 +106,7 @@ sentinel service restart   # restart (e.g. after a config change)
 sentinel service uninstall # remove from launchd entirely
 ```
 
-Logs are written to `~/Library/Logs/sentinel/`:
+Logs are written to `~/Library/Logs/macsentry/`:
 - `sentinel.log` — stdout (server access logs)
 - `sentinel.err.log` — stderr (errors and warnings)
 
@@ -149,12 +149,12 @@ Normal under macOS SIP. Sentinel shows your own processes and connections fully;
 
 **`ModuleNotFoundError: textual`**
 
-Install the `tui` extra: `poetry install` already includes it for source installs. For pip, reinstall with `pip install "sentinel[tui]"`.
+Install the `tui` extra: `poetry install` already includes it for source installs. For pip, reinstall with `pip install "macsentry[tui]"`.
 
 **`ModuleNotFoundError: fastapi` or `uvicorn`**
 
-Install the `api` extra: `poetry install --extras api` or `pip install "sentinel[api]"`.
+Install the `api` extra: `poetry install --extras api` or `pip install "macsentry[api]"`.
 
 **Service installed but API not reachable**
 
-Check the error log: `cat ~/Library/Logs/sentinel/sentinel.err.log`. If uvicorn is missing, run `pip install "sentinel[api]"` then `sentinel service restart`.
+Check the error log: `cat ~/Library/Logs/sentinel/sentinel.err.log`. If uvicorn is missing, run `pip install "macsentry[api]"` then `sentinel service restart`.

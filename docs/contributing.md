@@ -20,8 +20,8 @@ This guide covers everything you need to go from zero to a merged pull request.
 
 ```bash
 # clone the repo
-git clone https://github.com/EyuelAbebe/sentinel.git
-cd sentinel
+git clone https://github.com/EyuelAbebe/macsentry.git
+cd macsentry
 
 # install everything (runtime + TUI + dev tools)
 poetry install

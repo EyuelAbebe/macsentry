@@ -99,10 +99,10 @@ To completely remove Sentinel and all permissions:
 
 ```bash
 # Remove the application
-pipx uninstall sentinel        # or: poetry env remove python
+pipx uninstall macsentry       # or: poetry env remove python
 
 # Remove stored data
-rm -rf ~/.local/share/sentinel/
+rm -rf ~/.local/share/macsentry/
 
 # Remove browser extension
 # Open browser extensions page and remove "Sentinel Privacy Monitor"

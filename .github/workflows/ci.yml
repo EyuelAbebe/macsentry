@@ -104,7 +104,7 @@ jobs:
         run: poetry build --format wheel
 
       - name: Install from wheel
-        run: pip install dist/sentinel-*.whl "textual>=0.80"
+        run: pip install dist/macsentry-*.whl "textual>=0.80"
 
       - name: sentinel version
         run: |

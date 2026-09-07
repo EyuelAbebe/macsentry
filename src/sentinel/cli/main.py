@@ -43,7 +43,7 @@ def main(ctx: typer.Context) -> None:
 def version() -> None:
     """Show sentinel version."""
     try:
-        v = importlib.metadata.version("sentinel")
+        v = importlib.metadata.version("macsentry")
     except importlib.metadata.PackageNotFoundError:
         v = "dev"
     console.print(f"sentinel [bold]{v}[/bold]")
@@ -117,7 +117,7 @@ def doctor() -> None:
             table,
             "fastapi+uvicorn (optional)",
             False,
-            "not installed — run: pip install 'sentinel[api]'",
+            "not installed — run: pip install 'macsentry[api]'",
         )
 
     # yara (optional)
@@ -377,7 +377,7 @@ def serve(
     except ImportError:
         console.print(
             "[bold red]uvicorn is required for the API server.[/bold red]\n"
-            "Install it with:  [bold]pip install 'sentinel[api]'[/bold]"
+            "Install it with:  [bold]pip install 'macsentry[api]'[/bold]"
         )
         raise typer.Exit(1) from None
 
@@ -489,7 +489,7 @@ def _launch_tui() -> None:
     except ImportError:
         console.print(
             "[bold red]The interactive TUI requires the [cyan]textual[/cyan] package.[/bold red]\n"
-            "Install it with:  [bold]pip install 'sentinel[tui]'[/bold]"
+            "Install it with:  [bold]pip install 'macsentry[tui]'[/bold]"
         )
         raise SystemExit(1) from None
 

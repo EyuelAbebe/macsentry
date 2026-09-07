@@ -1,6 +1,6 @@
 # Sentinel
 
-[![CI](https://github.com/EyuelAbebe/sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/EyuelAbebe/sentinel/actions/workflows/ci.yml)
+[![CI](https://github.com/EyuelAbebe/macsentry/actions/workflows/ci.yml/badge.svg)](https://github.com/EyuelAbebe/macsentry/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -23,8 +23,8 @@ Run `sentinel` to open the interactive live monitor. Press `?` for help, `s` to 
 **Requires macOS 14+, Python 3.12+**
 
 ```bash
-git clone https://github.com/EyuelAbebe/sentinel.git
-cd sentinel
+git clone https://github.com/EyuelAbebe/macsentry.git
+cd macsentry
 pip install poetry && poetry install
 ```
 
