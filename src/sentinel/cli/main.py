@@ -395,7 +395,9 @@ def serve(
     foreground: bool = typer.Option(
         False, "--foreground", "-f", help="Run in foreground (blocks; useful for dev/debugging)."
     ),
-    reload: bool = typer.Option(False, "--reload", help="Enable hot-reload (implies --foreground)."),
+    reload: bool = typer.Option(
+        False, "--reload", help="Enable hot-reload (implies --foreground)."
+    ),
 ) -> None:
     """Start the MacSentry API server (runs in background by default)."""
     if foreground or reload:
@@ -494,9 +496,7 @@ def stop() -> None:
     pid = _serve_pid()
     if pid is None:
         console.print("[dim]No background serve process found.[/dim]")
-        console.print(
-            "If running as a launchd service, use:  [bold]macsentry service stop[/bold]"
-        )
+        console.print("If running as a launchd service, use:  [bold]macsentry service stop[/bold]")
         return
 
     try:
