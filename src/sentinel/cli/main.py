@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import importlib.metadata
+import os
+import signal
+import subprocess
 import sys
 from enum import StrEnum
+from pathlib import Path
 
 import typer
 from rich import box
@@ -14,8 +18,27 @@ from sentinel.cli.service import service_app
 from sentinel.config import get_config
 from sentinel.log import configure_logging
 
+_STATE_DIR = Path.home() / ".local" / "state" / "macsentry"
+_PID_FILE = _STATE_DIR / "serve.pid"
+_LOG_DIR = Path.home() / "Library" / "Logs" / "macsentry"
+_API_URL = "http://127.0.0.1:7173"
+
+
+def _serve_pid() -> int | None:
+    """Return PID of a running background serve process, or None."""
+    if not _PID_FILE.exists():
+        return None
+    try:
+        pid = int(_PID_FILE.read_text().strip())
+        os.kill(pid, 0)
+        return pid
+    except (ValueError, ProcessLookupError, PermissionError):
+        _PID_FILE.unlink(missing_ok=True)
+        return None
+
+
 app = typer.Typer(
-    name="sentinel",
+    name="macsentry",
     help="Local security and privacy monitor.",
     no_args_is_help=False,
     invoke_without_command=True,
@@ -41,12 +64,12 @@ def main(ctx: typer.Context) -> None:
 
 @app.command()
 def version() -> None:
-    """Show sentinel version."""
+    """Show macsentry version."""
     try:
-        v = importlib.metadata.version("sentinel")
+        v = importlib.metadata.version("macsentry")
     except importlib.metadata.PackageNotFoundError:
         v = "dev"
-    console.print(f"sentinel [bold]{v}[/bold]")
+    console.print(f"macsentry [bold]{v}[/bold]")
 
 
 @app.command()
@@ -166,7 +189,7 @@ def doctor() -> None:
     # launchd service (macOS only)
     import subprocess
 
-    launchd_label = "com.sentinel.agent"
+    launchd_label = "com.macsentry.agent"
     try:
         result = subprocess.run(
             ["launchctl", "list", launchd_label],
@@ -176,7 +199,7 @@ def doctor() -> None:
         )
         launchd_loaded = result.returncode == 0
         launchd_detail = (
-            "loaded" if launchd_loaded else "not loaded — run: sentinel service install"
+            "loaded" if launchd_loaded else "not loaded — run: macsentry service install"
         )
     except (FileNotFoundError, subprocess.TimeoutExpired):
         launchd_loaded = False
@@ -369,26 +392,129 @@ def watch() -> None:
 def serve(
     host: str = typer.Option("127.0.0.1", "--host", help="Bind address."),
     port: int = typer.Option(7173, "--port", "-p", help="Port number."),
-    reload: bool = typer.Option(False, "--reload", help="Enable hot-reload (dev only)."),
+    foreground: bool = typer.Option(
+        False, "--foreground", "-f", help="Run in foreground (blocks; useful for dev/debugging)."
+    ),
+    reload: bool = typer.Option(False, "--reload", help="Enable hot-reload (implies --foreground)."),
 ) -> None:
-    """Start the local HTTP/WebSocket API server."""
+    """Start the MacSentry API server (runs in background by default)."""
+    if foreground or reload:
+        _serve_foreground(host, port, reload)
+    else:
+        _serve_background(host, port)
+
+
+def _serve_foreground(host: str, port: int, reload: bool = False) -> None:
     try:
         import uvicorn
     except ImportError:
         console.print(
             "[bold red]uvicorn is required for the API server.[/bold red]\n"
-            "Install it with:  [bold]pip install 'sentinel[api]'[/bold]"
+            "Install with:  [bold]pip install 'macsentry[api]'[/bold]"
         )
         raise typer.Exit(1) from None
 
-    console.print(f"[green]Sentinel API starting on http://{host}:{port}[/green]")
-    uvicorn.run(
-        "sentinel.api.app:app",
-        host=host,
-        port=port,
-        reload=reload,
-        log_level="warning",
-    )
+    console.print(f"[green]MacSentry API starting on http://{host}:{port}[/green]")
+    uvicorn.run("sentinel.api.app:app", host=host, port=port, reload=reload, log_level="warning")
+
+
+def _serve_background(host: str, port: int) -> None:
+    try:
+        import uvicorn as _uv  # noqa: F401
+    except ImportError:
+        console.print(
+            "[bold red]uvicorn is required for the API server.[/bold red]\n"
+            "Install with:  [bold]pip install 'macsentry[api]'[/bold]"
+        )
+        raise typer.Exit(1) from None
+
+    existing = _serve_pid()
+    if existing:
+        console.print(
+            f"[yellow]MacSentry API is already running[/yellow] [dim](PID {existing})[/dim]"
+        )
+        console.print(f"  API  [dim]{_API_URL}/health[/dim]")
+        return
+
+    _STATE_DIR.mkdir(parents=True, exist_ok=True)
+    _LOG_DIR.mkdir(parents=True, exist_ok=True)
+    log_out = _LOG_DIR / "macsentry.log"
+    log_err = _LOG_DIR / "macsentry.err.log"
+
+    with open(log_out, "a") as out, open(log_err, "a") as err:
+        proc = subprocess.Popen(
+            [sys.argv[0], "serve", "--foreground", "--host", host, "--port", str(port)],
+            stdout=out,
+            stderr=err,
+            start_new_session=True,
+        )
+
+    _PID_FILE.write_text(str(proc.pid))
+    console.print(f"[green]MacSentry API started[/green] [dim](PID {proc.pid})[/dim]")
+    console.print(f"  API   [dim]{_API_URL}/health[/dim]")
+    console.print(f"  Logs  [dim]{log_out}[/dim]")
+    console.print("  Stop with:  [bold]macsentry stop[/bold]")
+
+
+@app.command()
+def status() -> None:
+    """Show whether the MacSentry API server is running."""
+    pid = _serve_pid()
+
+    if pid:
+        console.print(f"  Service  [green]running[/green]  [dim](PID {pid})[/dim]")
+    else:
+        # Fall back to checking the launchd service
+        import subprocess as _sp
+
+        from sentinel.cli.service import LABEL as _SVC_LABEL
+
+        r = _sp.run(["launchctl", "list", _SVC_LABEL], capture_output=True, text=True, timeout=3)
+        if r.returncode == 0:
+            console.print("  Service  [green]running[/green]  [dim](via launchd)[/dim]")
+        else:
+            console.print("  Service  [red]stopped[/red]")
+            console.print("  Start with:  [bold]macsentry serve[/bold]")
+
+    try:
+        import urllib.request
+
+        req = urllib.request.urlopen(f"{_API_URL}/health", timeout=2)
+        body = req.read().decode()
+        console.print(f"  API      [green]reachable[/green]  [dim]{body.strip()[:60]}[/dim]")
+    except Exception:
+        console.print(f"  API      [dim]not reachable at {_API_URL}/health[/dim]")
+
+    console.print(f"  Logs     [dim]{_LOG_DIR}/macsentry.log[/dim]")
+
+
+@app.command()
+def stop() -> None:
+    """Stop the background MacSentry API server."""
+    pid = _serve_pid()
+    if pid is None:
+        console.print("[dim]No background serve process found.[/dim]")
+        console.print(
+            "If running as a launchd service, use:  [bold]macsentry service stop[/bold]"
+        )
+        return
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+        _PID_FILE.unlink(missing_ok=True)
+        console.print(f"[green]MacSentry API stopped[/green] [dim](PID {pid})[/dim]")
+    except ProcessLookupError:
+        _PID_FILE.unlink(missing_ok=True)
+        console.print("[dim]Process was not running — cleaned up stale PID file.[/dim]")
+    except PermissionError:
+        console.print(f"[red]Permission denied stopping PID {pid}.[/red]")
+        raise typer.Exit(1) from None
+
+
+@app.command(name="help")
+def help_cmd(ctx: typer.Context) -> None:
+    """Show this help message."""
+    typer.echo(ctx.parent.get_help() if ctx.parent else ctx.get_help())
 
 
 # ── baseline subcommands ───────────────────────────────────────────────────
