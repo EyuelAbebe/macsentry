@@ -65,10 +65,13 @@ def main(ctx: typer.Context) -> None:
 @app.command()
 def version() -> None:
     """Show macsentry version."""
-    try:
-        v = importlib.metadata.version("macsentry")
-    except importlib.metadata.PackageNotFoundError:
-        v = "dev"
+    v = "dev"
+    for pkg in ("macsentry", "sentinel"):
+        try:
+            v = importlib.metadata.version(pkg)
+            break
+        except importlib.metadata.PackageNotFoundError:
+            continue
     console.print(f"macsentry [bold]{v}[/bold]")
 
 
